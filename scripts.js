@@ -1,5 +1,5 @@
 import { BOOKS_PER_PAGE, authors, genres, books } from "./data.js";
-import { htmlDataset } from "./htmlSelector.js";
+import { htmlDataset } from "./htmlDataset.js";
 
 //Change the theme settings
 htmlDataset.settings.cancel.addEventListener('click', function(e) {
@@ -32,45 +32,75 @@ htmlDataset.settings.overlay.addEventListener('submit', function(e) {
     htmlDataset.settings.overlay.close()
 }
 )
-//-------------------------------------------------------------------
-
-//Search buttons
-htmlDataset.header.search.addEventListener('click', function(){
-    htmlDataset.search.overlay.show();
-}
-)
-htmlDataset.search.cancel.addEventListener('click', function(){
-    htmlDataset.search.overlay.close();
-    }
-)
-
 //------------------------------------------------------------------
 
 //Displays the books on html
 const fragment = document.createDocumentFragment()
 
-const createPreview = ({ author, image, title, id }) => {
-    const preview = document.createElement('div')
-    preview.classList.add('preview')
-    //preview.setAttribute('data-preview-id', id)
+const createPreview = ({ author, image, title, id, description, published }) => {
+    const previewElement = document.createElement('div')
+    previewElement.classList.add('preview')
 
     const displayHtml = /* html */
     `
-        <img class="preview__image" src="${image}"/>
-        <div class="preview__info">
-        <h2 class="preview__title">${title}</h2>
-        <div class="preview__author">${authors[author]}</div>
+        <img class="preview__image" data-image-${id} id= "${id}" src="${image}"/>
+        <div class="preview__info" data-info-${id} id= "${id}">
+            <h2 class="preview__title" data-title-${id} id= "${id}">${title}</h2>
+            <div class="preview__author" data-author-${id} id= "${id}">${authors[author]}</div>
+            <dialog>
+                <div data-description-${id} id= "${id}">${description}</div>
+                <div data-subtitle-${id} id= "${id}">${published}</div>
+            </dialog>
         </div>
     `
-    preview.innerHTML = displayHtml
-    fragment.appendChild(preview)
-    return preview
+    previewElement.innerHTML = displayHtml
+    fragment.appendChild(previewElement)
+    return previewElement
 }
 
+const moreAboutBoook = (event) => {
+    htmlDataset.list.active.show()
+    const picture = document.querySelector(`[data-image-${event.target.id}]`).getAttribute('src')
+
+    htmlDataset.list.image.setAttribute('src', picture)
+    htmlDataset.list.blur.setAttribute('src', picture)
+    htmlDataset.list.title.innerHTML = document.querySelector(`[data-title-${event.target.id}]`).innerHTML
+    htmlDataset.list.description.innerHTML = document.querySelector(`[data-description-${event.target.id}]`).innerHTML
+    const year = new Date(document.querySelector(`[data-subtitle-${event.target.id}]`).innerHTML).getFullYear()
+    const name = document.querySelector(`[data-author-${event.target.id}]`).innerHTML
+    htmlDataset.list.subtitle.innerHTML = `${name}(${year})`
+}
+
+
+let extracted = books.slice(0, 36)
+for (const { author, image, title, id, description, published} of extracted) {
+    const preview = createPreview({
+                                    author,
+                                    id,
+                                    image,
+                                    title,
+                                    description,
+                                    published,
+                                })
+preview.addEventListener('click', moreAboutBoook)
+fragment.appendChild(preview)
+
+}
+const showBooks = document.querySelector('[data-list-items]').appendChild(fragment)
+
+
+const preview = document.querySelector('.preview')
+
+
+htmlDataset.list.close.addEventListener('click', function() {
+    htmlDataset.list.active.close()
+})
+
+//More books
 const matches = books
 let page = 1;
-
 let booksRemaining = matches.length - [page * BOOKS_PER_PAGE]
+const bookNotSeen = () => {
 const showMore = document.querySelector('[data-list-button]')
 const divOFShowMore = document.createElement('div')
 
@@ -81,42 +111,80 @@ const showMoreText = /*html*/
     `
 divOFShowMore.innerHTML = showMoreText;
 showMore.appendChild(divOFShowMore);
-
-let extracted = books.slice(0, 36)
-for (const { author, image, title, id } of extracted) {
-
-    createPreview({
-                                    author,
-                                    id,
-                                    image,
-                                    title
-                                })
+return booksRemaining
 }
-const showBooks = document.querySelector('[data-list-items]').appendChild(fragment)
 
+bookNotSeen()
 htmlDataset.list.button.addEventListener('click', function (event) {
     event.preventDefault();   
         page += 1;
+        booksRemaining = matches.length - [page * BOOKS_PER_PAGE]
         let rangeLast = page * BOOKS_PER_PAGE
         let rangeFirst = rangeLast - 36
         extracted = books.slice(rangeFirst, rangeLast)
-        console.log(page)
-        console.log(rangeLast)
     
-    for (const { author, image, title, id } of extracted) {
-
-        createPreview({
-                    author,
-                    id,
-                    image,
-                    title
-                })
+    for (const { author, image, title, id, description, published} of extracted) {
+        const preview =  createPreview({
+            author,
+            id,
+            image,
+            title,
+            description, 
+            published,
+        })
+        preview.addEventListener('click', moreAboutBoook)
+        fragment.appendChild(preview)
     }
     document.querySelector('[data-list-items]').appendChild(fragment)
-
+    bookNotSeen()
 }
 )
+const searchPreview = document.querySelector('.preview')
 
+//-------------------------------------------------------------------
+
+//Search buttons to open and close the search form
+htmlDataset.header.search.addEventListener('click', function(){
+    htmlDataset.search.overlay.show();
+}
+)
+htmlDataset.search.cancel.addEventListener('click', function(){
+    htmlDataset.search.overlay.close();
+    }
+)
+//Inside the search form
+const genresFragment = document.createDocumentFragment();
+let genresList = document.createElement('option');
+genresList.value = 'any';
+genresList.innerText = 'All genre';
+genresFragment.appendChild(genresList)
+
+for (const [id, nameOfGenre] of Object.entries(genres)) {
+    const genresList = document.createElement('option');
+    genresList.value = id;
+    genresList.innerText = nameOfGenre;
+    genresFragment.appendChild(genresList)
+}
+htmlDataset.search.genres.appendChild(genresFragment);
+
+const authorsFragment = document.createDocumentFragment()
+let authorsList = document.createElement('option')
+authorsList.value = 'any'
+authorsList.innerText = 'All Authors'
+authorsFragment.appendChild(authorsList)
+
+for (const [id, nameOfAuthor] of Object.entries(authors)) {
+    authorsList = document.createElement('option')
+    authorsList.value = id
+    authorsList.innerText = nameOfAuthor
+    authorsFragment.appendChild(authorsList)
+}
+htmlDataset.search.authors.appendChild(authorsFragment);
+
+//Search Functionality
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+//-----------------------------------------------------------------------
 
 // if (!books && !Array.isArray(books)) throw new Error('Source required') 
 // if (!range && range.length < 2) throw new Error('Range must be an array with two numbers')
