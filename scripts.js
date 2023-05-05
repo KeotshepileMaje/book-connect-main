@@ -28,7 +28,7 @@ htmlDataset.settings.overlay.addEventListener('submit', function(e) {
     if (themePreference === 'night') {
         document.documentElement.style.setProperty('--color-dark', theme.night.light)
         document.documentElement.style.setProperty('--color-light', theme.night.dark );
-    }
+    } 
     htmlDataset.settings.overlay.close()
 }
 )
