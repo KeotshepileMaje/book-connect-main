@@ -8,6 +8,7 @@ htmlDataset.settings.cancel.addEventListener('click', function(e) {
 htmlDataset.header.settings.addEventListener('click', function(e) { 
     htmlDataset.settings.overlay.show()
 })
+
 htmlDataset.settings.overlay.addEventListener('submit', function(e) {
     e.preventDefault();
     const theme = {
@@ -30,9 +31,8 @@ htmlDataset.settings.overlay.addEventListener('submit', function(e) {
         document.documentElement.style.setProperty('--color-light', theme.night.dark );
     } 
     htmlDataset.settings.overlay.close()
-}
-)
-//------------------------------------------------------------------
+})
+
 
 //Displays the books on html
 const fragment = document.createDocumentFragment()
@@ -71,7 +71,6 @@ const moreAboutBoook = (event) => {
     htmlDataset.list.subtitle.innerHTML = `${name}(${year})`
 }
 
-
 let extracted = books.slice(0, 36)
 for (const { author, image, title, id, description, published} of extracted) {
     const preview = createPreview({
@@ -86,12 +85,9 @@ preview.addEventListener('click', moreAboutBoook)
 fragment.appendChild(preview)
 
 }
-const showBooks = document.querySelector('[data-list-items]').appendChild(fragment)
+document.querySelector('[data-list-items]').appendChild(fragment)
 
-
-const preview = document.querySelector('.preview')
-
-
+//Close the more about the function
 htmlDataset.list.close.addEventListener('click', function() {
     htmlDataset.list.active.close()
 })
@@ -100,21 +96,24 @@ htmlDataset.list.close.addEventListener('click', function() {
 const matches = books
 let page = 1;
 let booksRemaining = matches.length - [page * BOOKS_PER_PAGE]
-const bookNotSeen = () => {
+
+/**
+ * Only 36 books are shown so the below code helps add 36 more books every time the button is pressed and show more books options to choose from.
+ */
+
+
 const showMore = document.querySelector('[data-list-button]')
 const divOFShowMore = document.createElement('div')
 
 const showMoreText = /*html*/
-    `
-    <span>Show more</span>
-    <span class="list__remaining"> (${booksRemaining})</span>
-    `
+`
+<span>Show more</span>
+<span class="list__remaining"> (${booksRemaining})</span>
+`
 divOFShowMore.innerHTML = showMoreText;
 showMore.appendChild(divOFShowMore);
-return booksRemaining
-}
 
-bookNotSeen()
+//Function to add more books
 htmlDataset.list.button.addEventListener('click', function (event) {
     event.preventDefault();   
         page += 1;
@@ -136,23 +135,32 @@ htmlDataset.list.button.addEventListener('click', function (event) {
         fragment.appendChild(preview)
     }
     document.querySelector('[data-list-items]').appendChild(fragment)
-    bookNotSeen()
+    const showMoreText = /*html*/
+    `
+    <span>Show more</span>
+    <span class="list__remaining"> (${booksRemaining})</span>
+    `
+divOFShowMore.innerHTML = showMoreText;
+showMore.appendChild(divOFShowMore);
+
 }
 )
-const searchPreview = document.querySelector('.preview')
-
-//-------------------------------------------------------------------
 
 //Search buttons to open and close the search form
+
 htmlDataset.header.search.addEventListener('click', function(){
     htmlDataset.search.overlay.show();
-}
-)
+})
 htmlDataset.search.cancel.addEventListener('click', function(){
     htmlDataset.search.overlay.close();
-    }
-)
-//Inside the search form
+})
+
+/*
+* Inside the  search form.
+* The option to search for genre.
+* The option to search for Authors.
+*/
+
 const genresFragment = document.createDocumentFragment();
 let genresList = document.createElement('option');
 genresList.value = 'any';
@@ -182,116 +190,75 @@ for (const [id, nameOfAuthor] of Object.entries(authors)) {
 htmlDataset.search.authors.appendChild(authorsFragment);
 
 //Search Functionality
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
-//-----------------------------------------------------------------------
-
-// if (!books && !Array.isArray(books)) throw new Error('Source required') 
-// if (!range && range.length < 2) throw new Error('Range must be an array with two numbers')
-
-// genres = document.createDocumentFragment()
-// element = document.createElement('option')
-// element.value = 'any'
-// element = 'All Genres'
-// genres.appendChild(element)
-
-// for ([id, name]; Object.entries(genres); i++) {
-//     document.createElement('option')
-//     element.value = value
-//     element.innerText = text
-//     genres.appendChild(element)
-// }
-
-// htmlDataset.search.genres.appendChild(genres)
-
-// authors = document.createDocumentFragment()
-// element = document.createElement('option')
-// element.value = 'any'
-// element.innerText = 'All Authors'
-// authors.appendChild(element)
-
-// for ([id, name];Object.entries(authors); id++) {
-//     document.createElement('option')
-//     element.value = value
-//     element = text
-//     authors.appendChild(element)
-// }
-
-// htmlDataset.search.authors.appendChild(authors)
 
 
+//Search Functionality
+htmlDataset.search.form.addEventListener('submit', (event)=>{
+    event.preventDefault();
+    htmlDataset.search.overlay.style.display = 'none'
+    document.querySelector('[data-list-items]').innerHTML = ''
+    const formData = new FormData(event.target)
+    const titleSearch = formData.get('title').toLowerCase();
+    const genreSearch = formData.get('genre').toLowerCase();
+    const authorSearch = formData.get('author').toLowerCase();
+const filteredBooks = [];
+for (let i = 0; i < books.length; i++) {
+  const book = books[i];
+    if (genreSearch === 'any' && authorSearch === 'any') {
+        if (book.title.toLowerCase().includes(titleSearch)){
+        filteredBooks.push(book);
+        }
+    }
+    if (genreSearch === 'any') {
+        if (book.title.toLowerCase().includes(titleSearch) && book.author === authorSearch){
+            filteredBooks.push(book);
+        }
+    }
 
+    if (titleSearch === '') {
+        if (book.author === authorSearch && book.genres.includes(genreSearch)){
+            filteredBooks.push(book);
+        }
+    }
+    if (titleSearch === '' && authorSearch === 'any' ) {
+        if (book.genres.includes(genreSearch)){
+            filteredBooks.push(book);
+        }
+   }
+    if (filteredBooks.length > 0){
+        htmlDataset.list.items.style.display = 'block'
+        htmlDataset.list.message.style.display = 'none'
+        document.querySelector('[data-list-button]').disabled = true
+    } else{
+        htmlDataset.list.items.style.display = 'none'
+        htmlDataset.list.message.style.display = 'block'
+        document.querySelector('[data-list-button]').disabled = true
+    }
 
-// htmlDataset.list.close.addEventListener('click', function(){
-//     htmlDataset.list.active.close()
-// })
+}
+document.querySelector('[data-list-button]').innerHTML =  `Show result (${filteredBooks.length})`
 
+const fragment2 = document.createDocumentFragment()
+    for (const {author ,image, title, id , description, published} of filteredBooks) {
+        const preview = document.createElement('button')
+        preview.className = 'preview'
+        preview.innerHTML= /*html*/`
+        <div>
+        <image class='preview__image' src="${image}" alt="book pic"}/>
+        </div>
+        <div class='preview__info'>
+        <dt class='preview__title'>${title}<dt>
+        <dt class='preview__author'>  ${authors[author]}</dt>
+        </div>`
+        fragment2.appendChild(preview)
+        }
+    const booklist2 = document.querySelector('[data-list-items]')
+    booklist2.append(fragment2)
+        document.querySelector('[data-search-form]').reset()
+        document.querySelector('[class="backdrop"]').style.display = "none";
 
-// htmlDataset.search.form.addEventListener(click(filters) {
-//     preventDefault()
-//     const formData = new FormData(event.target)
-//     const filters = Object.fromEntries(formData)
-//     result = []
-// }
-// )
-//     for (book; booksList; i++) {
-//         titleMatch = filters.title.trim() = '' && book.title.toLowerCase().includes[filters.title.toLowerCase()]
-//         authorMatch = filters.author = 'any' || book.author === filters.author
-
-//         {
-//             genreMatch = filters.genre = 'any'
-//             for (genre; book.genres; i++) { if singleGenre = filters.genre { genreMatch === true }}}
-//         }
-
-//         if titleMatch && authorMatch && genreMatch => result.push(book)
-//     }
-
-//     if (display.length < 1) {
-//     data.list.message.class.add('list__message_show')
-//     } else {
-//         data.list.message.class.remove('list__message_show')
-//     }
-    
-
-//     htmlDataset.list.items.innerHTML = ''
-//     const fragment = document.createDocumentFragment()
-//     const extracted = source.slice(range[0], range[1])
+        
+    })
+   
 
     
-//     htmlDataset.list.items.appendChild(fragments)
-//     initial === matches.length - [page * BOOKS_PER_PAGE]
-//     remaining === hasRemaining ? initial : 0
-//     htmlDataset.list.button.disabled = initial > 0
-
-//     htmlDataset.list.button.innerHTML = /* html */ `
-//         <span>Show more</span>
-//         <span class="list__remaining"> (${remaining})</span>
-//     `//more
-
-//     window.scrollTo({ top: 0, behavior: 'smooth' });
-//     htmlDataset.search.overlay.open = false//more
-// }
-
-// htmlDataset.list.items.click() {
-//     pathArray = Array.from(event.path || event.composedPath())
-//     active;
-
-//     for (node; pathArray; i++) {
-//         if active break;
-//         const previewId = node?.dataset?.preview
-    
-//         for (const singleBook of books) {
-//             if (singleBook.id === id) active = singleBook
-//         } 
-//     }
-    
-//     if !active return
-//     htmlDataset-list-active.open === true
-//     htmlDataset.list.blur + htmlDataset.list.image === active.image
-//     htmlDataset.list.title === active.title
-    
-//     htmlDataset.list.subtitle === '${authors[active.author]} (${Date(active.published).year})'
-//     htmlDataset.list.description === active.description
-// }
-
-
