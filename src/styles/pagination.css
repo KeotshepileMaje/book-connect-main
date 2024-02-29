@@ -1,0 +1,58 @@
+
+.pagination{
+    padding: auto;
+    width: 100%;
+    box-shadow: 0px 10px 30px -15px #000;
+    display: flex;
+    align-items: center;
+}
+.pagination ul{
+    display: flex;
+    margin: 0px 10px;
+}
+.pagination ul li{
+    list-style: none;
+    margin: 0px 5px;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    border-radius: 10px;
+    text-align: center;
+
+}
+.pagination ul li a{
+    font-size: 25px;
+    text-decoration: none;
+    color: #000;
+    display: block;
+    border-radius: 10px;
+    transition: 0.2s;
+}
+.pagination ul li .active_page{
+    background-color: #a05acb;
+    color: #fff;
+}
+.pagination ul li a:hover,
+.pagination button a:hover{
+    background-color: #a05acb;
+    color: #fff;
+}
+
+/* ---------- Buttons ---------- */
+.pagination button{
+    font-size: 20px;
+    font-weight: bold;
+    background-color: #f1f1f1;
+    border: none;
+    cursor: pointer;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.pagination button a{
+    text-decoration: none;
+    padding: 10px 20px;
+    display: block;
+    color: #000;
+    transition: 0.2s;
+}
+

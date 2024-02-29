@@ -5,7 +5,7 @@ import { htmlDataset } from "./htmlDataset.js";
 htmlDataset.settings.cancel.addEventListener('click', function(e) {
     htmlDataset.settings.overlay.close()
 })
-htmlDataset.header.settings.addEventListener('click', function(e) { 
+htmlDataset.nav.settings.addEventListener('click', function(e) { 
     htmlDataset.settings.overlay.show()
 })
 
@@ -101,15 +101,26 @@ let booksRemaining = matches.length - [page * BOOKS_PER_PAGE]
  * Only 36 books are shown so the below code helps add 36 more books every time the button is pressed and show more books options to choose from.
  */
 
-
 const showMore = document.querySelector('[data-list-button]')
 const divOFShowMore = document.createElement('div')
 
-const showMoreText = /*html*/
-`
-<span>Show more</span>
-<span class="list__remaining"> (${booksRemaining})</span>
-`
+const showMoreText =
+  /*html*/
+  `
+<div class="pagination">
+        <span class="list__remaining"> (${booksRemaining})</span>
+        <button type="button" class="prev"><a href="#">Prev</a></button>
+        <ul class="ul">
+            <li><a href="#" class="page_number">1</a></li>
+            <li><a href="#" class="page_number">2</a></li>
+            <li><a href="#" class="page_number active_page">3</a></li>
+            <li><a href="#" class="page_number">4</a></li>
+            <li><a href="#" class="page_number">5</a></li>
+        </ul>
+
+        <button type="button" class="next"><a href="#">Next</a></button>
+    </div>
+`;
 divOFShowMore.innerHTML = showMoreText;
 showMore.appendChild(divOFShowMore);
 
@@ -135,20 +146,31 @@ htmlDataset.list.button.addEventListener('click', function (event) {
         fragment.appendChild(preview)
     }
     document.querySelector('[data-list-items]').appendChild(fragment)
-    const showMoreText = /*html*/
-    `
-    <span>Show more</span>
-    <span class="list__remaining"> (${booksRemaining})</span>
-    `
+    const showMoreText =
+      /*html*/
+      `
+    <div class="pagination list__remaining">
+        <span class="list__remaining"> (${booksRemaining})</span>
+        <button type="button" class="prev"><a href="#">Prev</a></button>
+        <ul class="ul">
+            <li><a href="#" class="page_number">1</a></li>
+            <li><a href="#" class="page_number">2</a></li>
+            <li><a href="#" class="page_number active_page">3</a></li>
+            <li><a href="#" class="page_number">4</a></li>
+            <li><a href="#" class="page_number">5</a></li>
+        </ul>
+
+        <button type="button" class="next"><a href="#">Next</a></button>
+    </div>
+    `;
 divOFShowMore.innerHTML = showMoreText;
 showMore.appendChild(divOFShowMore);
-
 }
 )
 
 //Search buttons to open and close the search form
 
-htmlDataset.header.search.addEventListener('click', function(){
+htmlDataset.nav.search.addEventListener('click', function(){
     htmlDataset.search.overlay.show();
 })
 htmlDataset.search.cancel.addEventListener('click', function(){
